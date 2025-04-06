@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Bot Configurator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Discord Bot Configurator</h1>
+        <button id="loginBtn">Login with Discord</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const loginBtn = document.getElementById("loginBtn");
+        const statusDiv = document.getElementById("status");
+
+        // Discord OAuth2 login URL
+        const clientId = "YOUR_DISCORD_CLIENT_ID";
+        const redirectUri = "http://localhost:3000/auth/callback"; // Adjust with your URL
+        const scope = "identify guilds"; // Adjust as needed
+
+        loginBtn.addEventListener("click", () => {
+            // Redirect to Discord OAuth login
+            window.location.href = `https://discord.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}`;
+        });
+
+        // After login, show status
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get("code");
+
+        if (code) {
+            statusDiv.textContent = "Logging in...";
+
+            // Send the authorization code to the backend for token exchange
+            fetch(`/auth/discord/callback?code=${code}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        statusDiv.textContent = "Login successful!";
+                    } else {
+                        statusDiv.textContent = "Login failed.";
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
